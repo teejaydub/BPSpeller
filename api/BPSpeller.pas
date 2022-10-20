@@ -1,6 +1,10 @@
 unit BPSpeller;
 
-{ Delphi-style class interface for BPSpellerApi. }
+{ Delphi-style class interface for BPSpellerApi.
+
+  If the DLL isn't available or won't load, falls back to naive behavior -
+  just treats all words as OK.
+}
 
 interface
 
@@ -17,6 +21,9 @@ type
     constructor Create; overload;
   end;
 
+// Return True if spell checking is supported and fully loaded.
+function CanSpellCheck: Boolean;
+
 // Return True if W is a word, False if it's not.
 function SpellCheckWord(W: string): Boolean;
 
@@ -31,19 +38,27 @@ uses BPSpellerAPI;
 var
   speller: Pointer;
 
+function CanSpellCheck: Boolean;
+begin
+  Result := Assigned(speller);
+end;
+
 function SpellCheckWord(W: string): Boolean;
 begin
-  case BPSpellerAPI.CheckWord(speller, PChar(W)) of
-    BPSPELLER_OK: Result := True;
-    BPSPELLER_BAD_WORD: Result := False;
+  if not CanSpellCheck then
+    Result := True  // null behavior is: don't flag any words as misspelled
+  else
+    case BPSpellerAPI.CheckWord(speller, PChar(W)) of
+      BPSPELLER_OK: Result := True;
+      BPSPELLER_BAD_WORD: Result := False;
 
-    BPSPELLER_LANG_NOT_SUPPORTED,
-    BPSPELLER_LANG_IFACE_ERROR,
-    BPSPELLER_LANG_NOT_SET:
-      raise ESpellBadLanguage.Create;
+      BPSPELLER_LANG_NOT_SUPPORTED,
+      BPSPELLER_LANG_IFACE_ERROR,
+      BPSPELLER_LANG_NOT_SET:
+        raise ESpellBadLanguage.Create;
 
-    else raise ESpellException.Create;
-  end;
+      else raise ESpellException.Create;
+    end;
 end;
 
 {$POINTERMATH ON}
@@ -56,6 +71,9 @@ var
   i: Integer;
 begin
   Result := TStringList.Create;
+
+  if not CanSpellCheck then
+    Exit;
 
   case BPSpellerAPI.GetSuggestions(speller, PChar(W), suggestions, numSuggestions) of
     BPSPELLER_OK,
@@ -93,10 +111,14 @@ end;
 initialization
 
   speller := InitializeSpeller;
-  SetSpellerLanguage(speller, 'EN');
+
+  // Default to English.
+  if CanSpellCheck then
+    SetSpellerLanguage(speller, 'EN');
 
 finalization
 
-  FreeSpeller(speller);
+  if Assigned(speller) then
+    FreeSpeller(speller);
 
 end.

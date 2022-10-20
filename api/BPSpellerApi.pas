@@ -4,7 +4,7 @@ unit BPSpellerApi;
 // (during startup) to BPSpeller.dll and make it unable to run without it.
 // Keep the dot (undefine BPSPELLER_STATIC) to try to load it on first
 // call to InitializeSpeller.
-{$DEFINE BPSPELLER_STATIC}
+{.$DEFINE BPSPELLER_STATIC}
 
 interface
 
