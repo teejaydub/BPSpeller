@@ -14,6 +14,10 @@ The goal of this project is to simplify access to [Windows system speller](https
 * C library that can be compiled to either .lib or .dll and linked statically or dynamically
 * Delphi interface (see api/BPSpellerApi.pas)
 
+Added by teejaydub:
+* Simpler Delphi interface (in api/BPSpeller.pas)
+* Prebuilt .dll, provided as-is (place next to your .exe and if that works, great, you don't have to build it)
+
 # What's missing?
 
 Currently, BPSpeller is missing the following:
