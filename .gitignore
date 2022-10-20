@@ -1,3 +1,7 @@
 /BPSpeller/*.sdf
 /BPSpeller/*.suo
 /BPSpeller/BPSpeller/*.user
+/BPSpeller/BPSpeller/Debug/*
+/BPSpeller/BPSpeller/Release/*
+/BPSpeller/.vs/*
+/BPSpeller/Debug/*
